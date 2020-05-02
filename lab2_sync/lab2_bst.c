@@ -27,7 +27,29 @@
  *  @return                 : status (success or fail)
  */
 int lab2_node_print_inorder(lab2_tree *tree) {
-    // You need to implement lab2_node_print_inorder function.
+    lab2_node *p = tree->root;
+
+    if(tree->root == NULL) {
+        return 0;
+    }
+ 
+    if(p != NULL) {
+        p=p->left;
+        if(!p) {
+            return 0;
+        }
+        tree->root = p;
+        lab2_node_print_inorder(tree);
+
+        p=p->right;
+        if(!p) {
+            return 0;
+        }
+        tree->root = p;
+        lab2_node_print_inorder(tree);
+
+    }
+    return 0;
 }
 
 /*
