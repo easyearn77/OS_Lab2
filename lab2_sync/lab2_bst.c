@@ -110,6 +110,9 @@ int lab2_node_insert(lab2_tree *tree, lab2_node *new_node){
             p = p->right;
         }
     }
+
+    //p가 null이 되고나서 빠져 나옴
+    //q가 가리키는 인덱스에 새로운 노드를 삽입
     if (q == NULL) {
         tree->root = new_node;
         return 0;
@@ -207,7 +210,6 @@ int lab2_node_insert_cg(lab2_tree *tree, lab2_node *new_node){
     }
     if (q == NULL) {
         tree->root = new_node;
-        pthread_mutex_unlock(&tree->root->mutex);
         return 0;
     }
 
