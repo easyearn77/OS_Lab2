@@ -207,17 +207,18 @@ int lab2_node_insert_cg(lab2_tree *tree, lab2_node *new_node){
     }
     if (q == NULL) {
         tree->root = new_node;
+        pthread_mutex_unlock(&tree->root->mutex);
         return 0;
     }
 
-     else if(new_node->key < q->key) {
+    if(new_node->key < q->key) {
         q->left = new_node;
     } else {
         q->right = new_node;
     }
 
     pthread_mutex_unlock(&tree->root->mutex);
-    
+
     return 0;
 }
 
@@ -268,7 +269,13 @@ int lab2_node_remove_cg(lab2_tree *tree, int key) {
  *  @return                 : status(success or fail)
  */
 void lab2_tree_delete(lab2_tree *tree) {
-    // You need to implement lab2_tree_delete function.
+   
+    while (tree->root) {
+        lab2_node_delete(tree->root);
+    }
+    
+    tree->root = NULL;
+    free(tree);
 }
 
 /*
@@ -280,6 +287,9 @@ void lab2_tree_delete(lab2_tree *tree) {
  *  @return                 : status(success or fail)
  */
 void lab2_node_delete(lab2_node *node) {
-    // You need to implement lab2_node_delete function.
+   node->key = NULL;
+   node->left = NULL;
+   node->right = NULL;
+   free(node);
 }
 
