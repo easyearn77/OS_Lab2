@@ -110,6 +110,10 @@ int lab2_node_insert(lab2_tree *tree, lab2_node *new_node){
             p = p->right;
         }
     }
+    if (q == NULL) {
+        tree->root = new_node;
+        return 0;
+    }
 
     if(new_node->key < q->key) {
         q->left = new_node;
@@ -154,7 +158,12 @@ int lab2_node_insert_fg(lab2_tree *tree, lab2_node *new_node){
             pthread_mutex_unlock(&p->mutex);
         }
     }
-
+    if (q == NULL) {
+        pthread_mutex_lock(&q->mutex);
+        tree->root = new_node;
+        pthred_mutex_unlock(&q->mutex);
+        return 0;
+    }
     pthread_mutex_lock(&tree->root->mutex);
     if(new_node->key < q->key) {
         q->left = new_node;
@@ -195,6 +204,11 @@ int lab2_node_insert_cg(lab2_tree *tree, lab2_node *new_node){
         else {
             p = p->right;
         }
+    }
+    if (q == NULL) {
+        tree->root = new_node;
+        pthread_mutex_unlock(&tree->root->mutex);
+        return 0;
     }
 
     if(new_node->key < q->key) {
