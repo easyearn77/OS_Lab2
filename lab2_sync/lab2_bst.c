@@ -34,14 +34,14 @@ int lab2_node_print_inorder(lab2_tree *tree) {
     }
  
     if(p != NULL) {
-        p=p->left;
+        p = p->left;
         if(!p) {
             return 0;
         }
         tree->root = p;
         lab2_node_print_inorder(tree);
 
-        p=p->right;
+        p = p->right;
         if(!p) {
             return 0;
         }
@@ -416,7 +416,7 @@ int lab2_node_remove_cg(lab2_tree *tree, int key) {
     lab2_node *p = tree->root;
     lab2_node *q = NULL;
     lab2_node *k = NULL;
-    
+
     pthread_mutex_lock(&tree->root->mutex);
     while((p != NULL) && (p->key != key)) {
         q = p;
