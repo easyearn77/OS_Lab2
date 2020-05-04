@@ -19,6 +19,8 @@
 
 #include "lab2_sync_types.h"
 
+pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+
 /*
  * TODO
  *  Implement funtction which traverse BST in in-order
@@ -36,14 +38,14 @@ int lab2_node_print_inorder(lab2_tree *tree) {
     if(p != NULL) {
         p = p->left;
         if(!p) {
-            return 0;
+            return -1;
         }
         tree->root = p;
         lab2_node_print_inorder(tree);
 
         p = p->right;
         if(!p) {
-            return 0;
+            return -1;
         }
         tree->root = p;
         lab2_node_print_inorder(tree);
@@ -190,7 +192,6 @@ int lab2_node_insert_cg(lab2_tree *tree, lab2_node *new_node){
     lab2_node *q = NULL;
 
     pthread_mutex_lock(&tree->root->mutex);
-
     if(tree->root == NULL) {
         tree->root = new_node;
         return 0;
@@ -220,7 +221,6 @@ int lab2_node_insert_cg(lab2_tree *tree, lab2_node *new_node){
     }
 
     pthread_mutex_unlock(&tree->root->mutex);
-
     return 0;
 }
 
@@ -255,7 +255,7 @@ int lab2_node_remove(lab2_tree *tree, int key) {
         lab2_node_delete(p);
     }
 
-    if((p->left != 0) && (p->right == 0)) {
+    if((p->left != NULL) && (p->right == NULL)) {
         k = p;
         if(q->left == p) {
             q->left = p->left;
@@ -268,7 +268,7 @@ int lab2_node_remove(lab2_tree *tree, int key) {
         p->right = NULL;
     }
 
-    if((p->left == 0) && (p->right != 0)) {
+    if((p->left == NULL) && (p->right != NULL)) {
         k = p;
         if(q->left == p) {
             q->left = p->right;
@@ -279,17 +279,17 @@ int lab2_node_remove(lab2_tree *tree, int key) {
         lab2_node_delete(k);
         p->left = NULL;
         p->right =NULL;
-    } else if ((p->left != 0) && (p->right != 0)) {
+    } else if ((p->left != NULL) && (p->right != NULL)) {
         q = p;
         k = p->left;
-        while(k->right != 0) {
+        while(k->right != NULL) {
             q = k;
             k = k->right;
         }
 
         if(q == p) {
             p->key = k->key;
-            if(k->left != 0) {
+            if(k->left != NULL) {
                 p->left = k->left;
             } else {
                 p->left = NULL;
@@ -297,7 +297,7 @@ int lab2_node_remove(lab2_tree *tree, int key) {
             lab2_node_delete(k);
         } else {
                 p->key = k->key;
-                if(k->left != 0) {
+                if(k->left != NULL) {
                     q->right = k->left;
                 } else {
                     q->right = NULL;
@@ -343,7 +343,7 @@ int lab2_node_remove_fg(lab2_tree *tree, int key) {
         pthread_mutex_unlock(&p->mutex);
     }
 
-    if((p->left != 0) && (p->right == 0)) {
+    if((p->left != NULL) && (p->right == NULL)) {
         pthread_mutex_lock(&p->mutex);
         k = p;
         if(q->left == p) {
@@ -359,7 +359,7 @@ int lab2_node_remove_fg(lab2_tree *tree, int key) {
         pthread_mutex_unlock(&p->mutex);
     }
 
-    if((p->left == 0) && (p->right != 0)) {
+    if((p->left == NULL) && (p->right != NULL)) {
         pthread_mutex_lock(&p->mutex);
         k = p;
         if(q->left == p) {
@@ -372,18 +372,18 @@ int lab2_node_remove_fg(lab2_tree *tree, int key) {
         p->left = NULL;
         p->right =NULL;
         pthread_mutex_unlock(&p->mutex);
-    } else if ((p->left != 0) && (p->right != 0)) {
+    } else if ((p->left != NULL) && (p->right != NULL)) {
         pthread_mutex_lock(&p->mutex);
         q = p;
         k = p->left;
-        while(k->right != 0) {
+        while(k->right != NULL) {
             q = k;
             k = k->right;
         }
 
         if(q == p) {
             p->key = k->key;
-            if(k->left != 0) {
+            if(k->left != NULL) {
                 p->left = k->left;
             } else {
                 p->left = NULL;
@@ -391,7 +391,7 @@ int lab2_node_remove_fg(lab2_tree *tree, int key) {
             lab2_node_delete(k);
         } else {
             p->key = k->key;
-            if(k->left != 0) {
+            if(k->left != NULL) {
                 q->right = k->left;
             } else {
                 q->right = NULL;
@@ -436,7 +436,7 @@ int lab2_node_remove_cg(lab2_tree *tree, int key) {
         lab2_node_delete(p);
     }
 
-    if((p->left != 0) && (p->right == 0)) {
+    if((p->left != NULL) && (p->right == NULL)) {
         k = p;
         if(q->left == p) {
             q->left = p->left;
@@ -449,7 +449,7 @@ int lab2_node_remove_cg(lab2_tree *tree, int key) {
         p->right = NULL;
     }
 
-    if((p->left == 0) && (p->right != 0)) {
+    if((p->left == NULL) && (p->right != NULL)) {
         k = p;
         if(q->left == p) {
             q->left = p->right;
@@ -460,17 +460,17 @@ int lab2_node_remove_cg(lab2_tree *tree, int key) {
         lab2_node_delete(k);
         p->left = NULL;
         p->right =NULL;
-    } else if ((p->left != 0) && (p->right != 0)) {
+    } else if ((p->left != NULL) && (p->right != NULL)) {
         q = p;
         k = p->left;
-        while(k->right != 0) {
+        while(k->right != NULL) {
             q = k;
             k = k->right;
         }
 
         if(q == p) {
             p->key = k->key;
-            if(k->left != 0) {
+            if(k->left != NULL) {
                 p->left = k->left;
             } else {
                 p->left = NULL;
@@ -478,7 +478,7 @@ int lab2_node_remove_cg(lab2_tree *tree, int key) {
             lab2_node_delete(k);
         } else {
                 p->key = k->key;
-                if(k->left != 0) {
+                if(k->left != NULL) {
                     q->right = k->left;
                 } else {
                     q->right = NULL;
