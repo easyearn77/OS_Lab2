@@ -113,13 +113,6 @@ int lab2_node_insert(lab2_tree *tree, lab2_node *new_node){
         }
     }
 
-    //p가 null이 되고나서 빠져 나옴
-    //q가 가리키는 인덱스에 새로운 노드를 삽입
-    if (q == NULL) {
-        tree->root = new_node;
-        return 0;
-    }
-
     if(new_node->key < q->key) {
         q->left = new_node;
     } else {
@@ -137,15 +130,14 @@ int lab2_node_insert(lab2_tree *tree, lab2_node *new_node){
  *  @return                     : status (success or fail)
  */
 int lab2_node_insert_fg(lab2_tree *tree, lab2_node *new_node){
-    lab2_node *p = tree->root;
-    lab2_node *q = NULL;
-
-    if(tree->root == NULL) {
-        pthread_mutex_lock(&tree->root->mutex);
-        tree->root = new_node;
-        pthread_mutex_unlock(&tree->root->mutex);
+    lab2_node *k = lab2_node_create(new_node->key);
+    if(!tree->root) {
+        tree->root = k;
         return 0;
     }
+
+    lab2_node *p = tree->root;
+    lab2_node *q = NULL;
 
     while(p != NULL) {
         q = p;
@@ -153,29 +145,22 @@ int lab2_node_insert_fg(lab2_tree *tree, lab2_node *new_node){
             return 0;
         }
         if(new_node->key < p->key) {
-            pthread_mutex_lock(&p->mutex);
             p = p->left;
-            pthread_mutex_unlock(&p->mutex);
         } 
         else {
-            prhread_mutex_lock(&p->mutex);
             p = p->right;
-            pthread_mutex_unlock(&p->mutex);
         }
     }
-    if (q == NULL) {
-        pthread_mutex_lock(&q->mutex);
-        tree->root = new_node;
-        pthred_mutex_unlock(&q->mutex);
-        return 0;
-    }
-    pthread_mutex_lock(&tree->root->mutex);
+
     if(new_node->key < q->key) {
-        q->left = new_node;
+        pthread_mutex_lock(&q->mutex);
+        q->left = k;
+        pthred_mutex_unlock(&q->mutex);
     } else {
-        q->right = new_node;
+        pthread_mutex_lock(&q->mutex);
+        q->right = k;
+        pthred_mutex_unlock(&q->mutex);
     }
-    pthred_mutex_unlock(&tree->root->mutex);
     return 0;
 }
 
@@ -188,14 +173,16 @@ int lab2_node_insert_fg(lab2_tree *tree, lab2_node *new_node){
  *  @return                     : status (success or fail)
  */
 int lab2_node_insert_cg(lab2_tree *tree, lab2_node *new_node){
-    lab2_node *p = tree->root;
-    lab2_node *q = NULL;
+    lab2_node *k = lab2_node_create(new_node->key);
+    if(!tree->root) {
+        tree->root = k;
+        return 0;
+    }   
+    
 
     pthread_mutex_lock(&tree->root->mutex);
-    if(tree->root == NULL) {
-        tree->root = new_node;
-        return 0;
-    }
+    lab2_node *p = tree->root;
+    lab2_node *q = NULL;
 
     while(p != NULL) {
         q = p;
@@ -209,15 +196,11 @@ int lab2_node_insert_cg(lab2_tree *tree, lab2_node *new_node){
             p = p->right;
         }
     }
-    if (q == NULL) {
-        tree->root = new_node;
-        return 0;
-    }
 
     if(new_node->key < q->key) {
-        q->left = new_node;
+        q->left = k;
     } else {
-        q->right = new_node;
+        q->right = k;
     }
 
     pthread_mutex_unlock(&tree->root->mutex);
