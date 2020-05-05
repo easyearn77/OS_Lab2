@@ -285,7 +285,7 @@ int lab2_node_remove(lab2_tree *tree, int key) {
             q = k;
             k = k->right;
         }
-        if(q == p) {
+        if(k == p->left) {
             p->key = k->key;
             if(k->left != NULL) {
                 p->left = k->left;
@@ -386,14 +386,13 @@ int lab2_node_remove_fg(lab2_tree *tree, int key) {
 		pthread_mutex_unlock(&p->mutex);
     }
     else if((p->left != NULL) && (p->right != NULL)) {
-        q = p;
         k = p->left;
         while(k->right != NULL) {
             q = k;
             k = k->right;
         }
 		pthread_mutex_lock(&p->mutex);
-        if(q == p) {
+        if(k == p->left) {
             p->key = k->key;
             if(k->left != NULL) {
                 p->left = k->left;
@@ -490,13 +489,12 @@ int lab2_node_remove_cg(lab2_tree *tree, int key) {
         }
     }
     else if((p->left != NULL) && (p->right != NULL)) {
-        q = p;
         k = p->left;
         while(k->right != NULL) {
             q = k;
             k = k->right;
         }
-        if(q == p) {
+        if(k == p->left) {
             p->key = k->key;
             if(k->left != NULL) {
                 p->left = k->left;
