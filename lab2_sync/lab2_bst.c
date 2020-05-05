@@ -92,13 +92,15 @@ lab2_node * lab2_node_create(int key) {
  *  @return                 : satus (success or fail)
  */
 int lab2_node_insert(lab2_tree *tree, lab2_node *new_node){
-    lab2_node *p = tree->root;
-    lab2_node *q = NULL;
-
-    if(tree->root == NULL) {
-        tree->root = new_node;
+    lab2_node *k = lab2_node_create(new_node->key);
+    
+    if(!tree->root) {
+        tree->root = k;
         return 0;
     }
+    
+    lab2_node *p = tree->root;
+    lab2_node *q = NULL;
 
     while(p != NULL) {
         q = p;
@@ -114,9 +116,9 @@ int lab2_node_insert(lab2_tree *tree, lab2_node *new_node){
     }
 
     if(new_node->key < q->key) {
-        q->left = new_node;
+        q->left = k;
     } else {
-        q->right = new_node;
+        q->right = k;
     }
     return 0;
 }
@@ -131,6 +133,7 @@ int lab2_node_insert(lab2_tree *tree, lab2_node *new_node){
  */
 int lab2_node_insert_fg(lab2_tree *tree, lab2_node *new_node){
     lab2_node *k = lab2_node_create(new_node->key);
+    
     if(!tree->root) {
         tree->root = k;
         return 0;
@@ -174,12 +177,12 @@ int lab2_node_insert_fg(lab2_tree *tree, lab2_node *new_node){
  */
 int lab2_node_insert_cg(lab2_tree *tree, lab2_node *new_node){
     lab2_node *k = lab2_node_create(new_node->key);
+    
     if(!tree->root) {
         tree->root = k;
         return 0;
     }   
     
-
     pthread_mutex_lock(&tree->root->mutex);
     lab2_node *p = tree->root;
     lab2_node *q = NULL;
