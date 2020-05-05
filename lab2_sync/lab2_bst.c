@@ -159,11 +159,11 @@ int lab2_node_insert_fg(lab2_tree *tree, lab2_node *new_node){
     if(new_node->key < q->key) {
         pthread_mutex_lock(&q->mutex);
         q->left = k;
-        pthred_mutex_unlock(&q->mutex);
+        pthread_mutex_unlock(&q->mutex);
     } else {
         pthread_mutex_lock(&q->mutex);
         q->right = k;
-        pthred_mutex_unlock(&q->mutex);
+        pthread_mutex_unlock(&q->mutex);
     }
     return 0;
 }
