@@ -30,27 +30,28 @@ pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
  */
 int lab2_node_print_inorder(lab2_tree *tree) {
     lab2_node *p = tree->root;
+    int count = 0;
 
     if(tree->root == NULL) {
-        return 0;
+        return -1;
     }
  
     if(p != NULL) {
         p = p->left;
         if(!p) {
-            return -1;
+            return 1;
         }
         tree->root = p;
-        lab2_node_print_inorder(tree);
+        count=count+lab2_node_print_inorder(tree);
 
         p = p->right;
         if(!p) {
-            return -1;
+            return 1;
         }
         tree->root = p;
-        lab2_node_print_inorder(tree);
+        count=count+lab2_node_print_inorder(tree);
     }
-    return 0;
+    return count;
 }
 
 /*
@@ -105,7 +106,7 @@ int lab2_node_insert(lab2_tree *tree, lab2_node *new_node){
     while(p != NULL) {
         q = p;
         if(new_node->key == p->key) {
-            return 0;
+            return -1;
         }
         if(new_node->key < p->key) {
             p = p->left;
@@ -145,7 +146,7 @@ int lab2_node_insert_fg(lab2_tree *tree, lab2_node *new_node){
     while(p != NULL) {
         q = p;
         if(new_node->key == p->key) {
-            return 0;
+            return -1;
         }
         if(new_node->key < p->key) {
             p = p->left;
@@ -190,7 +191,8 @@ int lab2_node_insert_cg(lab2_tree *tree, lab2_node *new_node){
     while(p != NULL) {
         q = p;
         if(new_node->key == p->key) {
-            return 0;
+            pthread_mutex_unlock(&tree->root->mutex);
+            return -1;
         }
         if(new_node->key < p->key) {
             p = p->left;
@@ -219,80 +221,91 @@ int lab2_node_insert_cg(lab2_tree *tree, lab2_node *new_node){
  *  @return                 : status (success or fail)
  */
 int lab2_node_remove(lab2_tree *tree, int key) {
+    
+    if(!tree->root) {
+        return -1;
+    }
+
     lab2_node *p = tree->root;
     lab2_node *q = NULL;
     lab2_node *k = NULL;
-
-    while((p != NULL) && (p->key != key)) {
+    
+    while((p!=NULL) && (p->key != key)) {
         q = p;
+        if((p->left == NULL) && (p->right == NULL)) {
+            return -1;
+        }
+
         if(key < p->key) {
-            p = p->left;
-        } else {
-            p = p->right;
+            if(p->left) {
+                p = p->left;
+            }
+            else{
+                return -1;
+            }
+        }
+        else if(key > p->key) {
+            if(p->right) {
+                p = p->right;
+            }
+            else {
+                return -1;
+            }
         }
     }
-
+    
     if((p->left == NULL) && (p->right == NULL)) {
         if(q->left == p) {
             q->left = NULL;
-        } else {
-            q->right = NULL;    
         }
-        lab2_node_delete(p);
+        else if(q->right == p) {
+            q->right = NULL;
+        }
     }
-
-    if((p->left != NULL) && (p->right == NULL)) {
-        k = p;
+    else if((p->left != NULL) && (p->right == NULL)) {
         if(q->left == p) {
             q->left = p->left;
-        } else if(q->right == p){
+        }
+        else if(q->right == p) {
             q->right = p->left;
         }
-        p = p->left;
-        lab2_node_delete(k);
-        p->left = NULL;
-        p->right = NULL;
     }
-
-    if((p->left == NULL) && (p->right != NULL)) {
-        k = p;
+    else if((p->left == NULL) && (p->right != NULL)) {
         if(q->left == p) {
             q->left = p->right;
-        } else if(q->right == p){
+        }
+        else if(q->right == p) {
             q->right = p->right;
         }
-        p = p->right;
-        lab2_node_delete(k);
-        p->left = NULL;
-        p->right =NULL;
-    } else if ((p->left != NULL) && (p->right != NULL)) {
-        q = p;
+    }
+
+    else if((p->left != NULL) && (p->right != NULL)) {
         k = p->left;
         while(k->right != NULL) {
             q = k;
             k = k->right;
         }
-
         if(q == p) {
             p->key = k->key;
             if(k->left != NULL) {
                 p->left = k->left;
-            } else {
+            }
+            else {
                 p->left = NULL;
             }
-            lab2_node_delete(k);
-        } else {
-                p->key = k->key;
-                if(k->left != NULL) {
-                    q->right = k->left;
-                } else {
-                    q->right = NULL;
-                }
-                lab2_node_delete(k);
         }
-            
+        else {
+            p->key = k->key;
+            if(k->left != NULL) {
+                q->right = k->left;
+            }
+            else {
+                q->right = NULL;
+            }
+        }
     }
-    return 0;
+
+	return 0;
 }
 
 
@@ -305,85 +318,99 @@ int lab2_node_remove(lab2_tree *tree, int key) {
  *  @return                 : status (success or fail)
  */
 int lab2_node_remove_fg(lab2_tree *tree, int key) {
+   
+    if(!tree->root) {
+		return -1;
+    }
+
     lab2_node *p = tree->root;
     lab2_node *q = NULL;
-    lab2_node *k = NULL;    
+    lab2_node *k = NULL; 
 
     while((p != NULL) && (p->key != key)) {
         q = p;
+        if((p->left == NULL) && (p->right == NULL)) {
+            return -1;
+        }
+
         if(key < p->key) {
-            p = p->left;
-        } else {
-            p = p->right;
+            if(p->left) {
+                p = p->left;
+            }
+            else {
+                return -1;
+            }
         }
-    }
-    
+        else if(key > p->key) {
+            if(p->right) {
+                p = p->right;
+            }
+            else {
+                return -1;
+            }
+        }
+	}
+
+
     if((p->left == NULL) && (p->right == NULL)) {
-
-        if(q->left == p) {
+        pthread_mutex_lock(&p->mutex);
+        if(q->left==p) {
             q->left = NULL;
-        } else {
-            q->right = NULL;    
-        }
-
-    }
+		}
+		else if(q->right == p) {
+			q->right = NULL;
+		}
+ 		pthread_mutex_unlock(&p->mutex);
+	}
 
     if((p->left != NULL) && (p->right == NULL)) {
-  
-        k = p;
-        if(q->left == p) {
+		pthread_mutex_lock(&p->mutex);
+		if(q->left == p) {
             q->left = p->left;
-        } else if(q->right == p) {
+        }
+        else if(q->right == p) {
             q->right = p->left;
         }
-
-        p = p->left;
-
-        p->left = NULL;
-        p->right = NULL;
-
-    }
-
+ 		pthread_mutex_unlock(&p->mutex);
+	}
+       
     if((p->left == NULL) && (p->right != NULL)) {
-
+		pthread_mutex_lock(&p->mutex);
         k = p;
-        if(q->left == p) {
+        if(q->left == p){
             q->left = p->right;
-        } else {
+        }
+        else if(q->right == p) {
             q->right = p->right;
         }
-        p = p->right;
-
-        p->left = NULL;
-        p->right =NULL;
-
-    } else if ((p->left != NULL) && (p->right != NULL)) {
-
-        q = p;
+		pthread_mutex_unlock(&p->mutex);
+    }
+    else if((p->left != NULL) && (p->right != NULL)) {
         k = p->left;
         while(k->right != NULL) {
             q = k;
             k = k->right;
         }
-
+		pthread_mutex_lock(&p->mutex);
         if(q == p) {
             p->key = k->key;
             if(k->left != NULL) {
                 p->left = k->left;
-            } else {
+            } 
+            else {
                 p->left = NULL;
             }
- 
-        } else {
+        }
+        else {
             p->key = k->key;
             if(k->left != NULL) {
                 q->right = k->left;
-            } else {
+            }
+            else {
                 q->right = NULL;
             }
-            
         }
-
+		pthread_mutex_unlock(&p->mutex);
     }
     return 0;
 }
@@ -398,78 +425,95 @@ int lab2_node_remove_fg(lab2_tree *tree, int key) {
  *  @return                 : status (success or fail)
  */
 int lab2_node_remove_cg(lab2_tree *tree, int key) {
+   
+    if(!tree->root) {
+		return -1;
+    }
+    pthread_mutex_lock(&tree->root->mutex);
     lab2_node *p = tree->root;
     lab2_node *q = NULL;
-    lab2_node *k = NULL;
+    lab2_node *k = NULL; 
 
     while((p != NULL) && (p->key != key)) {
         q = p;
-        if(key < p->key) {
-            p = p->left;
-        } else {
-            p = p->right;
+        if((p->left == NULL) && (p->right == NULL)) {
+            pthread_mutex_unlock(&tree->root->mutex);
+            return -1;
         }
-    }
+
+        if(key < p->key) {
+            if(p->left) {
+                p = p->left;
+            }
+            else {
+                pthread_mutex_unlock(&tree->root->mutex);
+                return -1;
+            }
+        }
+        else if(key > p->key) {
+            if(p->right) {
+                p = p->right;
+            }
+            else {
+                pthread_mutex_unlock(&tree->root->mutex);
+                return -1;
+            }
+        }
+	}
+
 
     if((p->left == NULL) && (p->right == NULL)) {
         if(q->left == p) {
             q->left = NULL;
-        } else {
-            q->right = NULL;    
-        }
-
-    }
+		}
+		else if(q->right == p) {
+			q->right = NULL;
+		}
+	}
 
     if((p->left != NULL) && (p->right == NULL)) {
-        k = p;
-        if(q->left == p) {
+		if(q->left == p) {
             q->left = p->left;
-        } else if(q->right == p){
+        }
+        else if(q->right == p) {
             q->right = p->left;
         }
-        p = p->left;
-
-        p->left = NULL;
-        p->right = NULL;
-    }
-
+	}
+       
     if((p->left == NULL) && (p->right != NULL)) {
-        k = p;
-        if(q->left == p) {
+        if(q->left == p){
             q->left = p->right;
-        } else if(q->right == p){
+        }
+        else if(q->right == p) {
             q->right = p->right;
         }
-        p = p->right;
-
-        p->left = NULL;
-        p->right =NULL;
-    } else if ((p->left != NULL) && (p->right != NULL)) {
-        q = p;
+    }
+    else if((p->left != NULL) && (p->right != NULL)) {
         k = p->left;
         while(k->right != NULL) {
             q = k;
             k = k->right;
         }
-
         if(q == p) {
             p->key = k->key;
             if(k->left != NULL) {
                 p->left = k->left;
-            } else {
+            } 
+            else {
                 p->left = NULL;
             }
-        } else {
-                p->key = k->key;
-                if(k->left != NULL) {
-                    q->right = k->left;
-                } else {
-                    q->right = NULL;
-                }
         }
-            
+        else {
+            p->key = k->key;
+            if(k->left != NULL) {
+                q->right = k->left;
+            }
+            else {
+                q->right = NULL;
+            }
+        }
     }
-
+    pthread_mutex_unlock(&tree->root->mutex);
     return 0;
 }
 
@@ -510,7 +554,7 @@ void lab2_node_delete(lab2_node *node) {
        lab2_node_delete(node->right);
    }
 
-   node->key = NULL;
+   node->key = 0;
    node->left = NULL;
    node->right = NULL;
    free(node);
