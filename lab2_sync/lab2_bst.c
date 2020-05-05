@@ -1,8 +1,8 @@
 /*
 *	Operating System Lab
 *	    Lab2 (Synchronization)
-*	    Student id : 
-*	    Student name : 
+*	    Student id : 32177240, 32173478
+*	    Student name : 나현진, 이지언
 *
 *   lab2_bst.c :
 *       - thread-safe bst code.
@@ -285,7 +285,7 @@ int lab2_node_remove(lab2_tree *tree, int key) {
             q = k;
             k = k->right;
         }
-        if(k == p->left) {
+        if(q == p) {
             p->key = k->key;
             if(k->left != NULL) {
                 p->left = k->left;
@@ -354,7 +354,7 @@ int lab2_node_remove_fg(lab2_tree *tree, int key) {
 
     if((p->left == NULL) && (p->right == NULL)) {
         pthread_mutex_lock(&p->mutex);
-        if(q->left==p) {
+        if(q->left == p) {
             q->left = NULL;
 		}
 		else if(q->right == p) {
@@ -392,7 +392,7 @@ int lab2_node_remove_fg(lab2_tree *tree, int key) {
             k = k->right;
         }
 		pthread_mutex_lock(&p->mutex);
-        if(k == p->left) {
+        if(q == p) {
             p->key = k->key;
             if(k->left != NULL) {
                 p->left = k->left;
@@ -494,7 +494,7 @@ int lab2_node_remove_cg(lab2_tree *tree, int key) {
             q = k;
             k = k->right;
         }
-        if(k == p->left) {
+        if(q == p) {
             p->key = k->key;
             if(k->left != NULL) {
                 p->left = k->left;
