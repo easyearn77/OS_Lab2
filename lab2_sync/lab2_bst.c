@@ -30,30 +30,27 @@
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
 int lab2_node_print_inorder(lab2_tree *tree) {
-    // You need to implement lab2_node_print_inorder function.
 	lab2_node *p = tree->root;
-	int count=0;
+	int count = 0;
 
 	if(tree->root == NULL){
 		return -1;
 	}
 
-	if(p!=NULL){
-		p=p->left;
+	if(p != NULL){
+		p = p->left;
 		if(!p){
 			return 1;
 		}
 		tree->root = p;
-		count=count+lab2_node_print_inorder(tree);
-		
-	//	printf("%d ",p->key);
+		count = count + lab2_node_print_inorder(tree);
 
-		p=p->right;
+		p = p->right;
 		if(!p){
 			return 1;
 		}
-		tree->root=p;
-		count=count+lab2_node_print_inorder(tree);
+		tree->root = p;
+		count = count + lab2_node_print_inorder(tree);
 	}
 	return count;
 }
@@ -66,10 +63,8 @@ int lab2_node_print_inorder(lab2_tree *tree) {
  *  @return                 : bst which you created in this function.
  */
 lab2_tree *lab2_tree_create() {
-    // You need to implement lab2_tree_create function.
     lab2_tree *tree = (lab2_tree*)malloc(sizeof(lab2_tree));
-    //pthread_mutex_init(&tree->root->mutex, NULL);
-    tree->root=NULL;
+    tree->root = NULL;
     return tree;
 }
 
@@ -82,12 +77,11 @@ lab2_tree *lab2_tree_create() {
  *  @return                 : bst node which you created in this function.
  */
 lab2_node * lab2_node_create(int key) {
-    // You need to implement lab2_node_create function.
-	lab2_node *node=(lab2_node*)malloc(sizeof(lab2_node));
+	lab2_node *node = (lab2_node*)malloc(sizeof(lab2_node));
 	pthread_mutex_init(&(node->mutex),NULL);
-	node->key=key;
-	node->left=NULL;
-	node->right=NULL;
+	node->key = key;
+	node->left = NULL;
+	node->right = NULL;
 	return node;
 }
 
@@ -100,31 +94,30 @@ lab2_node * lab2_node_create(int key) {
  *  @return                 : satus (success or fail)
  */
 int lab2_node_insert(lab2_tree *tree, lab2_node *new_node){
-    // You need to implement lab2_node_insert function.
-        lab2_node *k=lab2_node_create(new_node->key);
+        lab2_node *k = lab2_node_create(new_node->key);
 
         if(!(tree->root)){
-                tree->root=k;
+                tree->root = k;
                 return 0;
         }
 
-        lab2_node *p= tree->root;
-        lab2_node *q = 0;
+        lab2_node *p = tree->root;
+        lab2_node *q = NULL;
 
-        while(p!=NULL){
-                q=p;
+        while(p != NULL){
+                q = p;
                 if((new_node->key) == (p->key))
                         return -1;
-                if((new_node->key)<(p->key))
-                        p=p->left;
+                if((new_node->key) < (p->key))
+                        p = p->left;
                 else
-                        p=p->right;
+                        p = p->right;
         }
 
         if(new_node->key < q->key)
-                q->left=k;
+                q->left = k;
         else if(new_node->key > q->key)
-                q->right=k;
+                q->right = k;
         return 0;
 
 }
@@ -138,36 +131,34 @@ int lab2_node_insert(lab2_tree *tree, lab2_node *new_node){
  *  @return                     : status (success or fail)
  */
 int lab2_node_insert_fg(lab2_tree *tree, lab2_node *new_node){
-      // You need to implement lab2_node_insert_fg function.
-
-        lab2_node *k=lab2_node_create(new_node->key);
+        lab2_node *k = lab2_node_create(new_node->key);
 
 	if(!(tree->root)){
-                tree->root=k;
+                tree->root = k;
                 return 0;
     	}
 
-        lab2_node *p= tree->root;
-        lab2_node *q = 0;
+        lab2_node *p = tree->root;
+        lab2_node *q = NULL;
 
-        while(p!=NULL){
-                q=p;
+        while(p != NULL){
+                q = p;
                 if((new_node->key) == (p->key))
                         return -1;
-                if((new_node->key)<(p->key))
-		       	p=p->left;
+                if((new_node->key) < (p->key))
+		       	p = p->left;
 		else
-			p=p->right;
+			p = p->right;
         }
 
         if(new_node->key < q->key){
 		pthread_mutex_lock(&q->mutex);
-                q->left=k;
+                q->left = k;
 		pthread_mutex_unlock(&q->mutex);
 	}
         else if(new_node->key > q->key){
 		pthread_mutex_lock(&q->mutex);
-                q->right=k;
+                q->right = k;
 		pthread_mutex_unlock(&q->mutex);
 	}
         return 0;
@@ -184,33 +175,32 @@ int lab2_node_insert_fg(lab2_tree *tree, lab2_node *new_node){
  *  @return                     : status (success or fail)
  */
 int lab2_node_insert_cg(lab2_tree *tree, lab2_node *new_node){
-    // You need to implement lab2_node_insert_cg function.
-	lab2_node *k=lab2_node_create(new_node->key);
+	lab2_node *k = lab2_node_create(new_node->key);
 
 	if(!(tree->root)){
-		tree->root=k;
-                return 0;
+		tree->root = k;
+                return 0; 
         }
 
 	pthread_mutex_lock(&tree->root->mutex);
-        lab2_node *p= tree->root;
-        lab2_node *q = 0;	
+        lab2_node *p = tree->root;
+        lab2_node *q = NULL;	
 
-        while(p!=NULL){
-                q=p;
+        while(p != NULL){
+                q = p;
                 if((new_node->key) == (p->key)){
                         break;
 		}
-                if((new_node->key)<(p->key))
-                        p=p->left;
+                if((new_node->key) < (p->key))
+                        p = p->left;
                 else
-                        p=p->right;
+                        p = p->right;
         }
 
         if(new_node->key < q->key)
-                q->left=k;
+                q->left = k;
         else if(new_node->key > q->key)
-                q->right=k;
+                q->right = k;
 
 	pthread_mutex_unlock(&tree->root->mutex);
 	return 0;
@@ -225,32 +215,30 @@ int lab2_node_insert_cg(lab2_tree *tree, lab2_node *new_node){
  *  @return                 : status (success or fail)
  */
 int lab2_node_remove(lab2_tree *tree, int key) {
-    // You need to implement lab2_node_remove function.
 	if(!tree->root)
                 return -1;
         
-        lab2_node*p=tree->root;
-        lab2_node*q=0;
-        lab2_node*k=0;
+        lab2_node *p = tree->root;
+        lab2_node *q = NULL;
+        lab2_node *k = NULL;
 
-        //트리의 루트부터 키에 해당하는 노드까지 포인터 이동
-        while((p!=NULL) && (p->key != key)){
-                q=p;
-                if((p->left == NULL)&&(p->right ==NULL)){
+        while((p != NULL) && (p->key != key)){
+                q = p;
+                if((p->left == NULL) && (p->right == NULL)){
                                 return -1;
                 }
 
-                if(key<p->key){
+                if(key < p->key){
                         if(p->left){
-                                p=p->left;
+                                p = p->left;
                         }
                         else{
                                 return -1;
                         }
                 }
-                else if(key>p->key){
+                else if(key > p->key){
                         if(p->right){
-                                p=p->right;
+                                p = p->right;
                         }
                         else{
                                 return -1;
@@ -258,52 +246,50 @@ int lab2_node_remove(lab2_tree *tree, int key) {
                 }
         }
 	
-	 //단말노드 일 경우
-        if((p->left==NULL)&&(p->right==NULL)){
-                if(q->left==p)
+        if((p->left == NULL) && (p->right == NULL)){
+                if(q->left == p)
                         q->left = NULL;
-                else if(q->right==p)
+                else if(q->right == p)
                         q->right = NULL;
         }
 
-        //하나의 자식을 갖는 노드일 경우 (왼쪽자식)
-        else if((p->left!=0)&&(p->right==0)){
-                if(q->left==p){
+        else if((p->left != NULL) && (p->right == NULL)){
+                if(q->left == p){
                         q->left = p->left;
                 }
-                else if(q->right==p){
+                else if(q->right == p){
                         q->right = p->left;
                 }
         }
-        //하나의 자식을 갖는 노드일 경우 (오른쪽 자식)
-        else if((p->left==0)&&(p->right!=0)){
-                if(q->left==p){
+ 
+        else if((p->left == NULL) && (p->right != NULL)){
+                if(q->left == p){
                         q->left = p->right;
                 }
-                else if(q->right==p){
+                else if(q->right == p){
                         q->right = p->right;
                 }
         }
-	 //두개의 자식을 갖는 노드일 경우
-        else if((p->left!=0)&&(p->right!=0)){
-                k=p->left;
-                while(k->right != 0){
-                        q=k;
-                        k=k->right;
+
+        else if((p->left != NULL) && (p->right != NULL)){
+                k = p->left;
+                while(k->right != NULL){
+                        q = k;
+                        k = k->right;
                 }
-                if(q==p){
+                if(q == p){
                         p->key = k->key;
-                        if(k->left!=0)
+                        if(k->left != NULL)
                                 p->left = k->left;
                         else
-                                p->left = 0;
+                                p->left = NULL;
                 }
                 else{
                         p->key = k->key;
-                        if(k->left!=0)
+                        if(k->left != NULL)
                                 q->right = k->left;
                         else
-                                q->right = 0;
+                                q->right = NULL;
                 }
         }
 
@@ -319,32 +305,30 @@ int lab2_node_remove(lab2_tree *tree, int key) {
  *  @return                 : status (success or fail)
  */
 int lab2_node_remove_fg(lab2_tree *tree, int key) {
-    // You need to implement lab2_node_remove_fg function.
 	if(!tree->root) 
 		return -1;
 
-	lab2_node*p=tree->root;
-        lab2_node*q=0;
-        lab2_node*k=0;
+	lab2_node *p = tree->root;
+        lab2_node *q = NULL;
+        lab2_node *k = NULL;
 	
-        //트리의 루트부터 키에 해당하는 노드까지 포인터 이동
-        while((p!=NULL) && (p->key != key)){
-                 q=p;
-                if((p->left == NULL)&&(p->right ==NULL)){
+        while((p != NULL) && (p->key != key)){
+                q = p;
+                if((p->left == NULL) && (p->right == NULL)){
                         return -1;
                 }
 
-                if(key<p->key){
+                if(key < p->key){
                         if(p->left){
-                                p=p->left;
+                                p = p->left;
                         }
                         else{
                                 return -1;
                         }
                 }
-                else if(key>p->key){
+                else if(key > p->key){
                         if(p->right){
-                                p=p->right;
+                                p = p->right;
                         }
                         else{
                                 return -1;
@@ -352,71 +336,68 @@ int lab2_node_remove_fg(lab2_tree *tree, int key) {
                 }
 	}
 
-        //단말노드 일 경우
-        if((p->left==NULL)&&(p->right==NULL)){
-                if(q->left==p){
+        if((p->left == NULL) && (p->right == NULL)){
+                if(q->left == p){
 			pthread_mutex_lock(&p->mutex);
 			q->left = NULL;
 	                pthread_mutex_unlock(&p->mutex);
 		}
-		else if(q->right==p){
+		else if(q->right == p){
 			pthread_mutex_lock(&p->mutex);
 			q->right = NULL;
 	                pthread_mutex_unlock(&p->mutex);
 		}
 	}
 
-        //하나의 자식을 갖는 노드일 경우 (왼쪽자식)
-        if((p->left!=0)&&(p->right==0)){
-		if(q->left==p){
+        if((p->left != NULL) && (p->right == NULL)){
+		if(q->left == p){
 			pthread_mutex_lock(&p->mutex);
                         q->left = p->left;
 			pthread_mutex_unlock(&p->mutex);
                 }
-                else if(q->right==p){
+                else if(q->right == p){
 			pthread_mutex_lock(&p->mutex);
                         q->right = p->left;
 			pthread_mutex_unlock(&p->mutex);
                 }
 	}
-        //하나의 자식을 갖는 노드일 경우 (오른쪽 자식)
-        if((p->left==0)&&(p->right!=0)){
-                k=p;
-                if(q->left==p){
+
+        if((p->left == NULL) && (p->right != NULL)){
+                k = p;
+                if(q->left == p){
 			pthread_mutex_lock(&p->mutex);
                         q->left = p->right;
 			pthread_mutex_unlock(&p->mutex);
                 }
-                else if(q->right==p){
+                else if(q->right == p){
 			pthread_mutex_lock(&p->mutex);
                         q->right = p->right;
 			pthread_mutex_unlock(&p->mutex);
                 }
         }
 
-        //두개의 자식을 갖는 노드일 경우
-        else if((p->left!=0)&&(p->right!=0)){
-                k=p->left;
-                while(k->right != 0){
-                        q=k;
-                        k=k->right;
+        else if((p->left != NULL) && (p->right != NULL)){
+                k = p->left;
+                while(k->right != NULL){
+                        q = k;
+                        k = k->right;
                 }
-                if(q==p){
+                if(q == p){
 			pthread_mutex_lock(&p->mutex);
                         p->key = k->key;
-                        if(k->left!=0)
+                        if(k->left != NULL)
                                 p->left = k->left;
                         else
-                                p->left = 0;
+                                p->left = NULL;
 			pthread_mutex_unlock(&p->mutex);
                 }
                 else{
 			pthread_mutex_lock(&p->mutex);
                         p->key = k->key;
-                        if(k->left!=0)
+                        if(k->left != NULL)
                                 q->right = k->left;
                         else
-                                q->right = 0;
+                                q->right = NULL;
 			pthread_mutex_unlock(&p->mutex);
                  }
         }
@@ -433,32 +414,30 @@ int lab2_node_remove_fg(lab2_tree *tree, int key) {
  *  @return                 : status (success or fail)
  */
 int lab2_node_remove_cg(lab2_tree *tree, int key) {
-    // You need to implement lab2_node_remove_cg function.
  	if(!tree->root)
 	       	return -1;
 	pthread_mutex_lock(&tree->root->mutex);
-	lab2_node*p=tree->root;
-        lab2_node*q=0;
-        lab2_node*k=0;
+	lab2_node *p = tree->root;
+        lab2_node *q = NULL;
+        lab2_node *k = NULL;
 
-        //트리의 루트부터 키에 해당하는 노드까지 포인터 이동
-        while((p!=NULL) && (p->key != key)){
-                q=p;
-                if((p->left == NULL)&&(p->right ==NULL)){
+        while((p != NULL) && (p->key != key)){
+                q = p;
+                if((p->left == NULL) && (p->right == NULL)){
 			break;
 		}
 
-		if(key<p->key){
+		if(key < p->key){
 			if(p->left){
-				p=p->left;
+				p = p->left;
 			}
 			else{
 				break;
 			}
 		}
-                else if(key>p->key){
+                else if(key > p->key){
                  	if(p->right){
-				p=p->right;
+				p = p->right;
 			}
 			else{
 				break;
@@ -466,55 +445,52 @@ int lab2_node_remove_cg(lab2_tree *tree, int key) {
 		}
         }
 
-	if(p->key==key){
+	if(p->key == key){
 
-		 //단말노드 일 경우
-	        if((p->left==NULL)&&(p->right==NULL)){
-			if(q->left==p)
+	        if((p->left == NULL) && (p->right == NULL)){
+			if(q->left == p)
 				q->left = NULL;
-	                else if(q->right==p)
+	                else if(q->right == p)
 				q->right = NULL;
         	}
 	
-        	//하나의 자식을 갖는 노드일 경우 (왼쪽자식)
-		else if((p->left!=0)&&(p->right==0)){
-        	        if(q->left==p){
+		else if((p->left != NULL) && (p->right == NULL)){
+        	        if(q->left == p){
         	                q->left = p->left;
         	        }
-        	        else if(q->right==p){
+        	        else if(q->right == p){
         	                q->right = p->left;
         	    	}
         	}
-        	//하나의 자식을 갖는 노드일 경우 (오른쪽 자식)
-		else if((p->left==0)&&(p->right!=0)){
-        	        if(q->left==p){
+  
+		else if((p->left == NULL) && (p->right != NULL)){
+        	        if(q->left == p){
         	                q->left = p->right;
         	        }
-     		        else if(q->right==p){
+     		        else if(q->right == p){
        		                q->right = p->right;
                		}
      	   	}
 
-   	     //두개의 자식을 갖는 노드일 경우
-   	     else if((p->left!=0)&&(p->right!=0)){
-   	             k=p->left;
-   	             while(k->right != 0){
-   	                     q=k;
-   	                     k=k->right;
+   	     else if((p->left != NULL) && (p->right != NULL)){
+   	             k = p->left;
+   	             while(k->right != NULL){
+   	                     q = k;
+   	                     k = k->right;
           	     }
-        	     if(q==p){
+        	     if(q == p){
         	             p->key = k->key;
-                    	     if(k->left!=0)
+                    	     if(k->left != NULL)
     	                    	p->left = k->left;
                       	     else
-                                p->left = 0;
+                                p->left = NULL;
                      }
                      else{
                      		p->key = k->key;
-                        	if(k->left!=0)
+                        	if(k->left != NULL)
                                		q->right = k->left;
                        		else
-                                	q->right = 0;
+                                	q->right = NULL;
                	     }
     		}
 	}
@@ -533,12 +509,11 @@ int lab2_node_remove_cg(lab2_tree *tree, int key) {
  *  @return                 : status(success or fail)
  */
 void lab2_tree_delete(lab2_tree *tree) {
-    // You need to implement lab2_tree_delete function.
-	if(tree->root!=NULL){
+	if(tree->root != NULL){
 		lab2_node_delete(tree->root);
 	}
 
-	tree->root=NULL;
+	tree->root = NULL;
 	free(tree);
 }
 
@@ -551,15 +526,14 @@ void lab2_tree_delete(lab2_tree *tree) {
  *  @return                 : status(success or fail)
  */
 void lab2_node_delete(lab2_node *node) {
-    // You need to implement lab2_node_delete function.
-    if(node->left!=NULL)
+    if(node->left != NULL)
 	    lab2_node_delete(node->left);
-    if(node->right!=NULL){
+    if(node->right != NULL){
 	    lab2_node_delete(node->right);
     }
-    node->key=0;
-    node->left=NULL;
-    node->right=NULL;
+    node->key = 0;
+    node->left = NULL;
+    node->right = NULL;
     free(node);
 }
 
